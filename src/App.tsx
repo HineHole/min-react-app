@@ -1,24 +1,53 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
+import NewTask from "./komponenter/newTask";
+import ListTasks from "./komponenter/taskList";
+import TodoList from "./modeller/listModel";
 
 function App() {
+  const [todoList, setTodoList] = useState<TodoList[]>([]);
+  const [display, setDisplay] = useState<boolean>(false);
+  const [ptext, setPtext] = useState<string>("");
+
+  const addNewTask = (task: string) => {
+    if (task.trim().length !== 0) {
+      setDisplay(false);
+
+      const filtered = todoList.filter((value) => value.task === task);
+      if (filtered.length === 0) {
+        const newTask = new TodoList(task);
+        setTodoList((arrayTodoList) => {
+          return [...arrayTodoList, newTask];
+        });
+      } else {
+        setDisplay(true);
+        setPtext("This task is already in your list!");
+      }
+    } else {
+      setDisplay(true);
+      setPtext("You can not add an empty task!");
+    }
+  };
+
+  const deleteTaskHandler = (id: number) => {
+    setTodoList((arrayTodoList) => {
+      return arrayTodoList.filter((task) => task.id !== id);
+    });
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <NewTask
+        addNewTask={addNewTask}
+        display={display}
+        ptext={ptext}
+      ></NewTask>
+
+      <ListTasks
+        list={todoList}
+        allTodos={todoList.length}
+        onDeleteTaskHandler={deleteTaskHandler}
+      ></ListTasks>
     </div>
   );
 }
